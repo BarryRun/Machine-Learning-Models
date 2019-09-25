@@ -14,6 +14,10 @@ def divide_and_conquer(x, y):
             return (x[0] + x[1])/2
         if x[0] < y[0] and x[1] > y[1]:
             return (y[0] + y[1])/2
+        if x[0] < y[0] and x[1] < y[1]:
+            return (y[0] + x[1])/2
+        if x[0] > y[0] and x[1] > y[1]:
+            return (x[0] + y[1])/2
 
     if n % 2 == 0:
         x_mid = (x[int(n/2)] + x[int((n-2)/2)]) / 2.0
@@ -31,8 +35,8 @@ def divide_and_conquer(x, y):
 
 
 if __name__ == '__main__':
-    y = [1, 50, 60, 61]
-    x = [-100, -50, 160, 999]
+    y = [1, 1]
+    x = [-100, 2]
     if len(x) != len(y) or len(x) == 0:
         print("输入有误！")
     else:
