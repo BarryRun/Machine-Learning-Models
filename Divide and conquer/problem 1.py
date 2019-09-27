@@ -35,8 +35,8 @@ def divide_and_conquer(x, y):
 
 
 if __name__ == '__main__':
-    y = [1, 1]
-    x = [-100, 2]
+    y = [1, 5, 96, 999]
+    x = [-100, 2, 93, 888]
     if len(x) != len(y) or len(x) == 0:
         print("输入有误！")
     else:
