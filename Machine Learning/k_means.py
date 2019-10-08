@@ -15,19 +15,19 @@ class Cluster(object):
     # 使用k_means算法对样本点进行分类
     def k_means(self):
         # 随机产生k个中心点
-        self.centers = self.initial_k_centers()
+        self.initial_k_centers()
         # 为每个点进行分类
-        self.point_cluster = self.assign_points()
+        self.assign_points()
 
         old_assignments = None
 
         # 直到聚类结果不再发生变化，结束聚类
         while self.point_cluster != old_assignments:
             # 重新计算每个类别的中心点
-            self.centers = self.update_centers()
+            self.update_centers()
             old_assignments = self.point_cluster
             # 为每个点进行分类
-            self.point_cluster = self.assign_points()
+            self.assign_points()
 
     # 画出样本点，并为不用样本点分别着色
     def draw_pic(self):
@@ -70,7 +70,7 @@ class Cluster(object):
             # 通过point_avg计算其中心点
             centers.append(self.point_avg(points))
 
-        return centers
+        self.centers =  centers
 
     # 给定样本以及聚类中心，为每个样本点计算最近的聚类中心
     def assign_points(self):
@@ -92,7 +92,7 @@ class Cluster(object):
                     shortest_index = i
             point_cluster.append(shortest_index)
         # 返回一个数组，对应data_points中相同index的点类别（即距离最近的中心点）
-        return point_cluster
+        self.point_cluster =  point_cluster
 
     # 计算欧氏距离
     def euclidean_distance(self, a, b):
@@ -115,11 +115,11 @@ class Cluster(object):
         for i in range(self.center_num):
             centers.append(self.points[random_ints[i]])
 
-        return centers
+        self.centers = centers
 
 
 if __name__ == '__main__':
     test_points = [[0, 0], [3, 8], [2, 2], [1, 1], [5, 3], [4, 8], [6, 3], [5, 4], [6, 4], [7, 5]]
-    cluster = Cluster(test_points, 5)
+    cluster = Cluster(test_points, 4)
     cluster.k_means()
     cluster.draw_pic()
