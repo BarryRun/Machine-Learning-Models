@@ -1,7 +1,3 @@
-# Algorithms-homework
-
-The code for the homework of the class named "算法设计与分析"
-
 ## 分治算法
 
 第一题：
@@ -22,3 +18,7 @@ The code for the homework of the class named "算法设计与分析"
 第六题：
 两元素和为X。给定一个由n 个实数构成的集合S 和另一个实数x，判断S 中是否有两个元素的和为x。试设计一个分治算法求解上述问题，并分析算法的时间复杂度。
 
+
+## 机器学习算法实现
+### K聚类
+### 感知器
