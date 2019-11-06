@@ -1,42 +1,88 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import math
+from scipy.stats import multivariate_normal
 
 
-# 高斯分布的概率密度函数
-def normal_distribution(x, mu, sigma):
-    return np.exp(-1*((x-mu)**2)/(2*(sigma**2)))/(math.sqrt(2*np.pi) * sigma)
+# 随机生成两个二元的正态分布, 二维的更加直观
+def data_generation(mu1, cov1, alpha1, mu2, cov2, alpha2):
+    first_guass = np.random.multivariate_normal(mu1, cov1, 100, check_valid="raise")
+    second_guass = np.random.multivariate_normal(mu2, cov2, 100, check_valid="raise")
 
-
-# 生成一个由三个一维高斯分布加权生成的一维数据
-def data_generation(mu1, sigma1, alpha1, mu2, sigma2, alpha2, mu3, sigma3, alpha3):
-    first_guass = np.random.normal(mu1, sigma1, 500)
-    second_guass = np.random.normal(mu2, sigma2, 500)
-    third_guass = np.random.normal(mu3, sigma3, 500)
-    data = alpha1 * first_guass + alpha2 * second_guass + alpha3 * third_guass
-    print(len(data))
-    print(data)
-
-    # 绘制三个高斯分布的概率密度曲线
-    x1 = np.linspace(mu1 - 6 * sigma1, mu1 + 6 * sigma1, 100)
-    x2 = np.linspace(mu2 - 6 * sigma2, mu2 + 6 * sigma2, 100)
-    x3 = np.linspace(mu3 - 6 * sigma3, mu3 + 6 * sigma3, 100)
-
-    y1 = normal_distribution(x1, mu1, sigma1)
-    y2 = normal_distribution(x2, mu2, sigma2)
-    y3 = normal_distribution(x3, mu3, sigma3)
-
-    plt.plot(x1, y1, 'r', label='m='+str(mu1)+',sig='+str(sigma1))
-    plt.plot(x2, y2, 'g', label='m='+str(mu2)+',sig='+str(sigma2))
-    plt.plot(x3, y3, 'b', label='m='+str(mu3)+',sig='+str(sigma3))
-    # 同时绘制出数据分布的地方
-    plt.scatter(data, [0.05]*500, s=1)
-    plt.legend()
+    # 绘制出数据的分布
+    plots1 = plt.scatter(first_guass[:, 0], first_guass[:, 1], s=5)
+    plots2 = plt.scatter(second_guass[:, 0], second_guass[:, 1], s=5)
+    plt.legend([plots1, plots2], ['first gauss', 'second gauss'], loc='upper right')
     plt.grid()
     plt.show()
 
-    return data
+    data = np.row_stack((first_guass, second_guass))
+    # print(data)
+    print(len(data))
+    label = [0] * 100 + [1] * 100
+    return data, label
+
+
+class EM(object):
+    def __init__(self, data, label):
+        self.data = data
+        self.label = label
+        # 设定初始化的参数, 分别表示：
+        # 第一个gauss的均值、协方差，第二个gauss的均值、协方差，以及属于第一个gauss概率
+        self.mu1 = [1, 1]
+        self.cov1 = np.identity(2)
+        self.mu2 = [2, 2]
+        self.cov2 = np.identity(2)
+        # 隐变量z，表示数据属于第一个gauss的概率
+        self.z = 0.5
+        self.epsilon = 0.00001
+
+    # Expectation Step
+    def expectation(self):
+        # 这里的隐变量z看做每个数据所属于的高斯类别
+        # 概率密度函数，即计算每个数据在当前分布下出现的概率
+        alpha1 = self.z * multivariate_normal.pdf(self.data, self.mu1, self.cov1)
+        alpha2 = (1 - self.z) * multivariate_normal.pdf(self.data, self.mu2, self.cov2)
+        # beta表示每个数据出现在第一个gauss下的概率
+        # 每个样本属于第一个gauss的概率
+        beta = alpha1 / (alpha1 + alpha2)
+        return beta
+
+    # Maximization Step
+    def maximization(self, beta):
+        # 根据E步所推断的出来的z值，来求最优化的各个参数
+        self.mu1 = np.dot(beta, self.data) / np.sum(beta)
+        self.mu2 = np.dot((1 - beta), self.data) / np.sum(1 - beta)
+        self.cov1 = np.dot(beta * (self.data - self.mu1).T, self.data - self.mu1) / np.sum(beta)
+        self.cov2 = np.dot((1 - beta) * (self.data - self.mu2).T, self.data - self.mu2) / np.sum(1 - beta)
+        self.z = np.sum(beta) / 200
+
+    # EM算法
+    def em(self):
+        k = 0
+        end = True
+        while end:
+            k += 1
+            end = False
+            old_mu1 = self.mu1.copy()
+            old_mu2 = self.mu2.copy()
+            beta = self.expectation()
+            self.maximization(beta)
+            print(k, '行均值,', 'mu1:', self.mu1, 'mu2:', self.mu2)
+            for i in range(2):
+                if not ((self.mu1[i] - old_mu1[i]) < self.epsilon and (self.mu2[i] - old_mu2[i]) < self.epsilon):
+                    end = True
+                    break
+
+        print('类别概率:\t', self.z)
+        print('均值:\t', self.mu1, self.mu2)
+        print('方差:\n', self.cov1, '\n', self.cov2, '\n')
 
 
 if __name__ == '__main__':
-    train_data = data_generation(2, 2.5, 0.4, -3, 1.5, 0.4, 5, 1.7, 0.2)
+    # 初始化两个二元的正态分布，并各随机生成100个点
+    # 两个正态分布的参数分别如下
+    # 1、均值为[0, 0]，协方差矩阵为[[1, 0], [0, 1]]，即各维度方差为1，且各维度之间不相关
+    # 2、均值为[3, 3]，协方差矩阵为[[1, 0], [0, 1]]，同上
+    train_data, train_label = data_generation([0, 0], np.identity(2), 0.4, [3, 3], np.identity(2), 0.6)
+    em = EM(train_data, train_label)
+    em.em()
