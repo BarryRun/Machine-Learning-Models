@@ -1,10 +1,10 @@
 
 ## 机器学习算法实现
-####K聚类
+#### K聚类
 
-####感知器
+#### 感知器
 
-####EM算法
+#### EM算法
 
 ![EM算法的过程](https://github.com/BarryRun/Algorithms-homework/blob/master/Machine%20Learning/em_res/em_process.gif)
 ***
