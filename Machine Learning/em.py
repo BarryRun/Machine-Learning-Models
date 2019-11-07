@@ -5,7 +5,7 @@ from scipy.stats import multivariate_normal
 
 # 随机生成两个二元的正态分布, 二维的更加直观
 def data_generation(mu1, cov1, alpha1, mu2, cov2, alpha2):
-    first_guass = np.random.multivariate_normal(mu1, cov1, 100, check_valid="raise")
+    first_guass = np.random.multivariate_normal(mu1, cov1, 200, check_valid="raise")
     second_guass = np.random.multivariate_normal(mu2, cov2, 100, check_valid="raise")
 
     # 绘制出数据的分布
@@ -18,7 +18,7 @@ def data_generation(mu1, cov1, alpha1, mu2, cov2, alpha2):
     data = np.row_stack((first_guass, second_guass))
     # print(data)
     print(len(data))
-    label = [0] * 100 + [1] * 100
+    label = [0] * 200 + [1] * 100
     return data, label
 
 
@@ -27,24 +27,25 @@ class EM(object):
         self.data = data
         self.label = label
         # 设定初始化的参数, 分别表示：
-        # 第一个gauss的均值、协方差，第二个gauss的均值、协方差，以及属于第一个gauss概率
+        # 第一个gauss的均值、协方差，第二个gauss的均值、协方差
         self.mu1 = [1, 1]
         self.cov1 = np.identity(2)
-        self.mu2 = [2, 2]
+        self.mu2 = [5, 5]
         self.cov2 = np.identity(2)
         # 隐变量z，表示数据属于第一个gauss的概率
         self.z = 0.5
-        self.epsilon = 0.00001
+        self.epsilon = 0.001
 
     # Expectation Step
     def expectation(self):
         # 这里的隐变量z看做每个数据所属于的高斯类别
         # 概率密度函数，即计算每个数据在当前分布下出现的概率
-        alpha1 = self.z * multivariate_normal.pdf(self.data, self.mu1, self.cov1)
-        alpha2 = (1 - self.z) * multivariate_normal.pdf(self.data, self.mu2, self.cov2)
-        # beta表示每个数据出现在第一个gauss下的概率
-        # 每个样本属于第一个gauss的概率
-        beta = alpha1 / (alpha1 + alpha2)
+        # alpha1表示gauss1中数据出现的概率
+        # alpha2表示gauss2中数据出现的概率
+        alpha1 = multivariate_normal.pdf(self.data, self.mu1, self.cov1)
+        alpha2 = multivariate_normal.pdf(self.data, self.mu2, self.cov2)
+        # beta表示每个样本属于第一个gauss的概率
+        beta = self.z * alpha1 / (self.z * alpha1 + (1 - self.z) * alpha2)
         return beta
 
     # Maximization Step
@@ -54,13 +55,15 @@ class EM(object):
         self.mu2 = np.dot((1 - beta), self.data) / np.sum(1 - beta)
         self.cov1 = np.dot(beta * (self.data - self.mu1).T, self.data - self.mu1) / np.sum(beta)
         self.cov2 = np.dot((1 - beta) * (self.data - self.mu2).T, self.data - self.mu2) / np.sum(1 - beta)
-        self.z = np.sum(beta) / 200
+        self.z = np.sum(beta) / len(self.data)
 
     # EM算法
     def em(self):
         k = 0
         end = True
+        print(k, '行均值,', 'mu1:', self.mu1, 'mu2:', self.mu2)
         while end:
+            self.draw_plot(k)
             k += 1
             end = False
             old_mu1 = self.mu1.copy()
@@ -69,13 +72,34 @@ class EM(object):
             self.maximization(beta)
             print(k, '行均值,', 'mu1:', self.mu1, 'mu2:', self.mu2)
             for i in range(2):
-                if not ((self.mu1[i] - old_mu1[i]) < self.epsilon and (self.mu2[i] - old_mu2[i]) < self.epsilon):
+                if abs(self.mu1[i] - old_mu1[i]) > self.epsilon or abs(self.mu2[i] - old_mu2[i]) > self.epsilon:
                     end = True
                     break
 
-        print('类别概率:\t', self.z)
-        print('均值:\t', self.mu1, self.mu2)
-        print('方差:\n', self.cov1, '\n', self.cov2, '\n')
+        print('类别概率:\tgauss1:', self.z, '\tgauss2:', 1 - self.z)
+        print('均值:\tmu1:', self.mu1, '\tmu2:', self.mu2)
+        print('协方差矩阵:\ncov1:', self.cov1, '\ncov2:', self.cov2, '\n')
+
+    # 对当前的分类结果进行绘图
+    def draw_plot(self, index):
+        gauss1 = multivariate_normal(self.mu1, self.cov1)
+        gauss2 = multivariate_normal(self.mu2, self.cov2)
+        p1 = gauss1.pdf(self.data)
+        p2 = gauss2.pdf(self.data)
+        for i in range(len(self.data)):
+            if p1[i] > p2[i]:
+                plt.scatter(self.data[i][0], self.data[i][1], s=5, edgecolors='red')
+            else:
+                plt.scatter(self.data[i][0], self.data[i][1], s=5, edgecolors='blue')
+        plt.scatter(self.mu1[0], self.mu1[1], s=40, edgecolors='black')
+        plt.annotate('(' + str(round(self.mu1[0], 2)) + ',' + str(round(self.mu1[1], 2)) + ')',
+                     xy=(self.mu1[0], self.mu1[1]), fontsize=20)
+        plt.scatter(self.mu2[0], self.mu2[1], s=40, edgecolors='black')
+        plt.annotate('(' + str(round(self.mu2[0], 2)) + ',' + str(round(self.mu2[1], 2)) + ')',
+                     xy=(self.mu2[0], self.mu2[1]), fontsize=20)
+        plt.grid()
+        plt.savefig('em_res/cluster_res' + str(index) + '.jpg')
+        plt.show()
 
 
 if __name__ == '__main__':
