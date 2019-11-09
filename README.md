@@ -6,7 +6,9 @@
 
 #### EM算法
 
-![EM算法的过程](https://github.com/BarryRun/Algorithms-homework/blob/master/Machine%20Learning/simple_em_res/em_process.gif)
+![两个gauss下EM算法的过程](https://github.com/BarryRun/Algorithms-homework/blob/master/Machine%20Learning/simple_em_res/em_process.gif)
+
+![三个gauss下EM算法的过程](em_res/em_process.gif)
 ***
 
 # 简单的算法题

@@ -4,11 +4,11 @@ import random
 from scipy.stats import multivariate_normal
 
 
-# 随机生成两个二元的正态分布, 二维的更加直观
+# 随机生成由3个二元的正态分布所组成的数据, 二维的更加直观
 def data_generation(mu1, cov1, mu2, cov2, mu3, cov3):
-    first_gauss = np.random.multivariate_normal(mu1, cov1, 300, check_valid="raise")
-    second_gauss = np.random.multivariate_normal(mu2, cov2, 300, check_valid="raise")
-    third_gauss = np.random.multivariate_normal(mu3, cov3, 300, check_valid="raise")
+    first_gauss = np.random.multivariate_normal(mu1, cov1, 200, check_valid="raise")
+    second_gauss = np.random.multivariate_normal(mu2, cov2, 200, check_valid="raise")
+    third_gauss = np.random.multivariate_normal(mu3, cov3, 200, check_valid="raise")
 
     # 绘制出数据的分布
     plots1 = plt.scatter(first_gauss[:, 0], first_gauss[:, 1], s=5, edgecolors='red')
@@ -125,7 +125,7 @@ class EM(object):
         plt.annotate('(' + str(round(self.mu3[0], 2)) + ',' + str(round(self.mu3[1], 2)) + ')',
                      xy=(self.mu3[0], self.mu3[1]), fontsize=20)
         plt.grid()
-        # plt.savefig('em_res/cluster_res' + str(index) + '.jpg')
+        plt.savefig('em_res/cluster_res' + str(index) + '.jpg')
         plt.show()
 
 
