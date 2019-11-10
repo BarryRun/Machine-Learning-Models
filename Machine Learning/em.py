@@ -27,7 +27,7 @@ def data_generation(mu1, cov1, mu2, cov2, mu3, cov3):
 class EM(object):
     def __init__(self, data):
         self.data = data
-        # 设定初始化的参数
+        # 随机初始化各个gauss的参数
         self.mu = [[random.uniform(min(data[:, 0]), max(data[:, 0])),
                     random.uniform(min(data[:, 1]), max(data[:, 1]))],
                    [random.uniform(min(data[:, 0]), max(data[:, 0])),
@@ -35,12 +35,12 @@ class EM(object):
                    [random.uniform(min(data[:, 0]), max(data[:, 0])),
                     random.uniform(min(data[:, 1]), max(data[:, 1]))]]
         self.cov = [np.identity(2), np.identity(2), np.identity(2)]
-        # 初始化隐变量z，分别表示属于属于每个guass的概率
+        # 随机初始化隐变量z，分别表示属于属于每个gauss的概率
         rand_array = np.random.rand(3)
         self.z = rand_array / np.sum(rand_array)
         self.epsilon = 0.001
 
-    # Expectation Step
+    # Expectation Step：求z的后验概率分布
     def expectation(self):
         alpha = [0.0, 0.0, 0.0]
         for i in range(3):
@@ -52,9 +52,8 @@ class EM(object):
 
         return beta
 
-    # Maximization Step
+    # Maximization Step:在E步所求的z的后验概率分布下，来求最优化的各个参数
     def maximization(self, beta):
-        # 根据E步所推断的出来的z值，来求最优化的各个参数
         for i in range(3):
             beta_sum = np.sum(beta[i])
             self.mu[i] = np.dot(beta[i], self.data) / beta_sum
@@ -70,17 +69,17 @@ class EM(object):
             self.draw_plot(k)
             k += 1
             end = False
-            old_mu1 = self.mu[0].copy()
-            old_mu2 = self.mu[1].copy()
-            old_mu3 = self.mu[2].copy()
+            old_mu = self.mu.copy()
             # 先通过E步求隐变量的后验分布
             beta = self.expectation()
             # 然后通过M步最大化各个参数
             self.maximization(beta)
             print(k, '行均值,', 'mu1:', self.mu[0], 'mu2:', self.mu[1], 'mu3:', self.mu[2])
+            # 当所有的mu变化小于epsilon时停止变化
             for i in range(2):
-                if abs(self.mu[0][i] - old_mu1[i]) > self.epsilon or abs(self.mu[1][i] - old_mu2[i]) > self.epsilon or abs(
-                        self.mu[2][i] - old_mu3[i]) > self.epsilon:
+                if abs(self.mu[0][i] - old_mu[0][i]) > self.epsilon or abs(
+                        self.mu[1][i] - old_mu[1][i]) > self.epsilon or abs(
+                        self.mu[2][i] - old_mu[2][i]) > self.epsilon:
                     end = True
                     break
 
@@ -97,22 +96,18 @@ class EM(object):
         p2 = gauss2.pdf(self.data)
         p3 = gauss3.pdf(self.data)
         for i in range(len(self.data)):
-            if max(p1[i], p2[i], p3[i]) == p1[i]:
+            max_pdf = max(p1[i], p2[i], p3[i])
+            if max_pdf == p1[i]:
                 plt.scatter(self.data[i][0], self.data[i][1], s=5, edgecolors='red')
-            elif max(p1[i], p2[i], p3[i]) == p2[i]:
+            elif max_pdf == p2[i]:
                 plt.scatter(self.data[i][0], self.data[i][1], s=5, edgecolors='blue')
             else:
                 plt.scatter(self.data[i][0], self.data[i][1], s=5, edgecolors='green')
 
-        plt.scatter(self.mu[0][0], self.mu[0][1], s=40, edgecolors='black')
-        plt.annotate('(' + str(round(self.mu[0][0], 2)) + ',' + str(round(self.mu[0][1], 2)) + ')',
-                     xy=(self.mu[0][0], self.mu[0][1]), fontsize=20)
-        plt.scatter(self.mu[1][0], self.mu[1][1], s=40, edgecolors='black')
-        plt.annotate('(' + str(round(self.mu[1][0], 2)) + ',' + str(round(self.mu[1][1], 2)) + ')',
-                     xy=(self.mu[1][0], self.mu[1][1]), fontsize=20)
-        plt.scatter(self.mu[2][0], self.mu[2][1], s=40, edgecolors='black')
-        plt.annotate('(' + str(round(self.mu[2][0], 2)) + ',' + str(round(self.mu[2][1], 2)) + ')',
-                     xy=(self.mu[2][0], self.mu[2][1]), fontsize=20)
+        for i in range(3):
+            plt.scatter(self.mu[i][0], self.mu[i][1], s=40, edgecolors='black')
+            plt.annotate('(' + str(round(self.mu[i][0], 2)) + ',' + str(round(self.mu[i][1], 2)) + ')',
+                         xy=(self.mu[0][0], self.mu[0][1]), fontsize=20)
         plt.grid()
         # plt.savefig('em_res/cluster_res' + str(index) + '.jpg')
         plt.show()
