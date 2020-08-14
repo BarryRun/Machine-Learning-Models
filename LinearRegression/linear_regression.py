@@ -91,7 +91,7 @@ def linear_regression(x_train_set, y_train_set, x_validation, y_validation):
         if epoch % 100 == 0:
             print(str(epoch) + ' epoch: train loss=' + str(loss) + ' val_loss=' + str(val_loss))
 
-        # 判断是否停止迭代
+        # 判断是否停止迭代：如果val_loss超过20轮迭代未发生下降，则停止训练
         if val_loss >= last_val_loss or last_val_loss - val_loss <= 10e-6:
             stay_epoch += 1
             if stay_epoch == 20:
@@ -101,9 +101,11 @@ def linear_regression(x_train_set, y_train_set, x_validation, y_validation):
             stay_epoch = 0
 
         epoch += 1
+        # 梯度下降，计算下降的梯度：这里需要对均方根误差进行求导
         gradient = 2 * np.dot(x_train_set.transpose(), np.dot(x_train_set, w) - y_train_set)  # dim*1
+        # adagrad迭代中公式，可参照 https://www.jianshu.com/p/a8637d1bb3fc， 即梯度越大，学习率越小
         adagrad += gradient ** 2
-        w = w - learning_rate * gradient / np.sqrt(adagrad + eps)
+        w = w - learning_rate * gradient / np.sqrt(adagrad + eps)   # 加eps防止除0
         last_val_loss = val_loss
 
     # 保存训练模型
