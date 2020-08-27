@@ -29,6 +29,6 @@ data = np.dot(data, v[:, sorted_indices])
 
 # 作图查看降维效果
 xVal = data[:, 0]
-yVal = data[:, 1]
+yVal = -data[:, 1]  # 不知道为什么，这里加一个负号就跟sklearn的PCA结果一样，否则不一样
 plt.scatter(xVal, yVal)
 plt.show()
