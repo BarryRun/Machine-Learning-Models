@@ -1,11 +1,12 @@
 
 ## 机器学习算法实现
-#### K聚类
-#### 线性回归
-#### 感知机
-#### 朴素贝叶斯
-#### PCA降维
-#### EM算法
+#### [K聚类](https://github.com/BarryRun/Machine-Learning-Practice/blob/master/Cluster/k_means.py)
+#### [线性回归](https://github.com/BarryRun/Machine-Learning-Practice/blob/master/LinearRegression/linear_regression.py)
+#### [感知机](https://github.com/BarryRun/Machine-Learning-Practice/blob/master/Perceptron/Perceptron.py)
+#### [朴素贝叶斯](https://github.com/BarryRun/Machine-Learning-Practice/blob/master/Naive%20Bayes/naive_bayes.py)
+#### [PCA降维](https://github.com/BarryRun/Machine-Learning-Practice/blob/master/PCA/pca.py)
+#### [决策树](https://github.com/BarryRun/Machine-Learning-Practice/blob/master/Decision%20Tree/decision_tree(ID3).py)
+#### [EM算法](https://github.com/BarryRun/Machine-Learning-Practice/blob/master/EM/em.py)
 
 ![两个gauss下EM算法的过程](https://github.com/BarryRun/Machine-Learning-Practice/blob/master/EM/simple_em_res/em_process.gif)
 
