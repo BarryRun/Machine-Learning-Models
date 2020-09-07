@@ -1,6 +1,7 @@
 from collections import defaultdict
 import random
 from math import sqrt
+import numpy as np
 import matplotlib.pyplot as plt
 
 
@@ -22,20 +23,24 @@ class Cluster(object):
         old_assignments = None
 
         # 直到聚类结果不再发生变化，结束聚类
+        epoch = 0
         while self.point_cluster != old_assignments:
             # 重新计算每个类别的中心点
             self.update_centers()
             old_assignments = self.point_cluster
             # 为每个点进行分类
             self.assign_points()
+            self.draw_pic(epoch)
+            epoch += 1
 
     # 画出样本点，并为不用样本点分别着色
-    def draw_pic(self):
+    def draw_pic(self, epoch):
         mark = ['or', 'ob', 'og', 'ok', '^r', '+r', 'sr', 'dr', '<r', 'pr']
         # 对于所有点以及其所属类别
         for cluster, point in zip(self.point_cluster, self.points):
             # 将不同类别的点分开
             plt.plot(point[0], point[1], mark[cluster], markersize=5)
+        plt.savefig('images/k_means'+str(epoch)+'.jpg')
         plt.show()
 
     # 计算样本的均值
@@ -120,6 +125,9 @@ class Cluster(object):
 
 if __name__ == '__main__':
     test_points = [[0, 0], [3, 8], [2, 2], [1, 1], [5, 3], [4, 8], [6, 3], [5, 4], [6, 4], [7, 5]]
-    cluster = Cluster(test_points, 4)
+    first_gauss = np.random.multivariate_normal([0, 2], np.identity(2), 20, check_valid="raise")
+    second_gauss = np.random.multivariate_normal([3, 3], np.identity(2), 20, check_valid="raise")
+    third_gauss = np.random.multivariate_normal([-1, 5], np.identity(2), 20, check_valid="raise")
+    data = np.row_stack((first_gauss, second_gauss, third_gauss))
+    cluster = Cluster(data, 3)
     cluster.k_means()
-    cluster.draw_pic()

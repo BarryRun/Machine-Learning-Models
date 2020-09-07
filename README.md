@@ -1,6 +1,8 @@
 
 ## 机器学习算法实现
 #### [K聚类](https://github.com/BarryRun/Machine-Learning-Practice/blob/master/Cluster/k_means.py)
+
+![K_means聚类过程](https://github.com/BarryRun/Machine-Learning-Practice/blob/master/Cluster/images/k_means_process.gif)
 #### [线性回归](https://github.com/BarryRun/Machine-Learning-Practice/blob/master/LinearRegression/linear_regression.py)
 #### [感知机](https://github.com/BarryRun/Machine-Learning-Practice/blob/master/Perceptron/Perceptron.py)  
 
