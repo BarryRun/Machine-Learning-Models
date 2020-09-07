@@ -1,9 +1,13 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+
 class Perceptron(object):
     def __init__(self, c, _train_data, _train_label, _initial_weight):
-        self.c = c          # c：权向量校正时候的校正增量
-        self.train_data = _train_data   # train_data：所有的模式
-        self.train_label = _train_label # train_label：所有模式所属的类别
-        self.weight = _initial_weight   # initial_weight：权向量的初始化权重
+        self.c = c  # c：权向量校正时候的校正增量
+        self.train_data = _train_data  # train_data：所有的模式
+        self.train_label = _train_label  # train_label：所有模式所属的类别
+        self.weight = _initial_weight  # initial_weight：权向量的初始化权重
         self.dimension = len(train_data[0])
         if len(_train_data) != len(_train_label) or self.dimension != len(_initial_weight) - 1:
             print("数据长度有误")
@@ -37,12 +41,25 @@ class Perceptron(object):
                     self.weight[i] += self.c * data[i]
                 self.weight[self.dimension] += self.train_label[index]
                 # 记录预测结果，并记录更新后的权重值
-                print('第' + str(index+1) + '个数据错判，修改权重当前权重为', str(self.weight))
+                print('第' + str(index + 1) + '个数据错判，修改权重当前权重为', str(self.weight))
             else:
-                print('第' + str(index+1) + '个数据判别正确')
+                print('第' + str(index + 1) + '个数据判别正确')
         return end
 
-    def get_res_weight(self):
+    def data_plot(self, index):
+        d1 = self.train_data[np.where(self.train_label == 1)]
+        d2 = self.train_data[np.where(self.train_label == -1)]
+        plt.scatter(d1[:, 0], d1[:, 1])
+        plt.scatter(-d2[:, 0], -d2[:, 1])
+        # 绘制当前权重表示的直线
+        x = np.linspace(0, 1, 100)
+        w1, w2, b = self.weight
+        y = -(w1/w2)*x - b/w2
+        plt.plot(x, y)
+        plt.savefig('images/res' + str(index) + '.jpg')
+        plt.show()
+
+    def fit(self):
         self.data_normalization()
         i = 1
         while True:
@@ -51,13 +68,35 @@ class Perceptron(object):
                 print("感知器算法结束，最终结果权重为：", str(self.weight))
                 return
             else:
-                print("@@@@@@@@@@@@@@@@@@@@@第" + str(i) + "轮迭代结果：", str(self.weight))
+                print('@' * 20 + "第" + str(i) + "轮迭代结果：", str(self.weight))
+
+            self.data_plot(i)
             i += 1
 
 
+def linear_data_construct():
+    """
+    生成一组线性可分的数据
+    数据分布于以(0,0) (0,1) (1,0) (1,1)为顶点的正方形内，位于直线 y=0.5x+0.3上方则类别为1，
+    :return: x,y: 分别代表坐标、类别
+    """
+    # 随机生成100个0-1之间的二元组
+    x = np.random.rand(20, 2)
+    y = []
+    for a in x:
+        if a[1] > (a[0] * 0.5 + 0.3):
+            y.append(1)
+        else:
+            y.append(-1)
+    return x, np.array(y)
+
+
 if __name__ == '__main__':
-    train_data = [[0, 0, 0], [1, 0, 0], [1, 0, 1], [1, 1, 0], [0, 0, 1], [0, 1, 1], [0, 1, 0], [1, 1, 1]]
-    train_label = [1, 1, 1, 1, -1, -1, -1, -1]
-    initial_weight = [-1, -2, -2, 0]
-    perceptron = Perceptron(2, train_data, train_label, initial_weight)
-    perceptron.get_res_weight()
+    # train_data = [[0, 0, 0], [1, 0, 0], [1, 0, 1], [1, 1, 0], [0, 0, 1], [0, 1, 1], [0, 1, 0], [1, 1, 1]]
+    # train_label = [1, 1, 1, 1, -1, -1, -1, -1]
+    train_data, train_label = linear_data_construct()
+    print(train_label)
+    initial_weight = [1, -1, 0]
+    # initial_weight = [-1, -2, -2, 0]
+    perceptron = Perceptron(1, train_data, train_label, initial_weight)
+    perceptron.fit()

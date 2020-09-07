@@ -66,7 +66,7 @@ class EM(object):
         end = True
         print('初始行均值,', 'mu1:', self.mu[0], 'mu2:', self.mu[1], 'mu3:', self.mu[2])
         while end:
-            self.draw_plot(k)
+            # self.draw_plot(k)
             k += 1
             end = False
             old_mu = self.mu.copy()

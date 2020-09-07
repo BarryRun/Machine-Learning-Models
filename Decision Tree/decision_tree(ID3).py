@@ -5,6 +5,7 @@ import pickle
 import random
 from collections import defaultdict
 
+
 def data_loader(data_path):
     """
     本文所使用的数据来源于 https://archive.ics.uci.edu/ml/datasets/Parkinson%27s+Disease+Classification#
@@ -28,7 +29,40 @@ def data_loader(data_path):
     test_y = test_data['class']
     test_x = test_data.drop(columns=['id', 'class'])
 
+    print(train_x, train_y)
     # 该数据没有缺失值，因此不需要进行缺失值的处理
+    return train_x, train_y, test_x, test_y
+
+
+def simple_data_loader():
+    """
+    生成统计学系方法上贷款申请样本数据集的例子
+    :return:
+    """
+    data = [[0, 0, 0, 0, 0],
+            [0, 0, 0, 1, 0],
+            [0, 1, 0, 1, 1],
+            [0, 1, 1, 0, 1],
+            [0, 0, 0, 0, 0],
+            [1, 0, 0, 0, 0],
+            [1, 0, 0, 1, 0],
+            [1, 1, 1, 1, 1],
+            [1, 0, 1, 2, 1],
+            [1, 0, 1, 2, 1],
+            [2, 0, 1, 2, 1],
+            [2, 0, 1, 1, 1],
+            [2, 1, 0, 1, 1],
+            [2, 1, 0, 2, 1],
+            [2, 0, 0, 0, 0]]
+    csv_data = pd.DataFrame(data, columns=['age', 'has_work', 'has_house', 'credit_situation', 'class'])
+    # 划分训练集、测试集
+    train_data = csv_data.sample(frac=0.8, random_state=4396, axis=0)
+    test_data = csv_data[~csv_data.index.isin(train_data.index)]
+    # 划分特征与标签
+    train_y = train_data['class']
+    train_x = train_data.drop(columns=['class'])
+    test_y = test_data['class']
+    test_x = test_data.drop(columns=['class'])
     return train_x, train_y, test_x, test_y
 
 
@@ -54,7 +88,7 @@ def decision_tree(train_x, train_y):
     best_feature, vals_for_bes_feature = select_best_feature(train_x, train_y)
 
     # 根据该特征的每一个值，生成一个分支
-    tree = {best_feature:{}}
+    tree = {best_feature: {}}
     for val in vals_for_bes_feature:
         # 删除非对应值的数据, 同时删除对应特征列
         index_to_del = train_x[train_x[best_feature] != val].index
@@ -65,17 +99,17 @@ def decision_tree(train_x, train_y):
 
 
 def predict(tree, test_x, test_y):
-    print(test_x)
+    # print(test_x)
     positive = 0.
     negative = 0.
     for (idx1, row1), label in zip(test_x.iterrows(), test_y):
-    # for x, y in zip(test_x, test_y):
+        # for x, y in zip(test_x, test_y):
         # 根据当前特征的值，来决定走哪一个分支
         key = list(tree.keys())[0]
         # print(key, row1)
         next = tree[key][row1[key]]
         while type(next) is dict:
-            print(next)
+            # print(next)
             key = list(next.keys())[0]
             # 这里有可能会产生缺失值问题。即：测试集中的特征未曾在训练集中出现过
             # 这里先随机地分到一类中去，后续再进行补充处理
@@ -88,7 +122,7 @@ def predict(tree, test_x, test_y):
             positive += 1
         else:
             negative += 1
-    print('Acc is:', positive/(positive+negative))
+    print('Acc is:', positive / (positive + negative))
 
 
 def select_best_feature(_x, _y):
@@ -137,7 +171,7 @@ def calculate_entropy(labels):
     # 计算所有label出现的频率
     for label in label_count:
         ratio = label_count[label] / len(labels)
-        res -= ratio*(math.log(ratio, 2))
+        res -= ratio * (math.log(ratio, 2))
 
     return res
 
@@ -151,13 +185,13 @@ def major_label(labels):
     label_num = defaultdict(int)
     for label in labels:
         label_num[label] += 1
-    label_num = sorted(label_num.items(), key=lambda x:x[1], reverse=True)
+    label_num = sorted(label_num.items(), key=lambda x: x[1], reverse=True)
     return label_num[0][0]
 
 
-
 if __name__ == '__main__':
-    x, y, t_x, t_y = data_loader('pd_speech_features.csv')
-    # tree = decision_tree(x, y)
-    # pickle.dump(tree, open("model_tree.pk", 'wb'))
-    predict(pickle.load(open('model_tree.pk', 'rb')), t_x, t_y)
+    x, y, t_x, t_y = simple_data_loader()
+    # x, y, t_x, t_y = data_loader('pd_speech_features.csv')
+    tree = decision_tree(x, y)
+    pickle.dump(tree, open("simple_model_tree.pk", 'wb'))
+    # predict(pickle.load(open('simple_model_tree.pk', 'rb')), t_x, t_y)

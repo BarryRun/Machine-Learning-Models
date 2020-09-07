@@ -3,9 +3,11 @@ import numpy as np
 
 # 首先尝试最简单的数据线性可分的硬间隔SVM
 class SVM:
-    def __init__(self, data_num=1000):
+    def __init__(self, c, max_epoch, data_num=1000):
         # 用于初始化一些超参数
         self.data_num = data_num
+        self.max_epoch = max_epoch
+        self.C = c
 
     def linear_data_construct(self):
         """
@@ -23,11 +25,23 @@ class SVM:
                 y.append(-1)
         return x, y
 
-    def train(self):
+    def first_to_opt(self, x, y):
+
+    def second_to_opt
+
+
+    def fit_smo(self, x, y):
         """
-        根据训练数据求解，采用SMO算法
+        具体的计算方法参考 https://zhuanlan.zhihu.com/p/140912728
+        :param x: 训练数据的特征
+        :param y: 训练数据的标签
         :return:
         """
+        epoch = 0
+        alpha = [0] * self.data_num
+        for epoch in range(self.max_epoch):
+            # 选择第一个优化变量
+            idx1 = first_to_opt
 
 
 if __name__ == '__main__':

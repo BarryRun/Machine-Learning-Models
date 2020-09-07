@@ -2,7 +2,6 @@ import numpy as np
 import pandas as pd
 import math
 import csv
-from sklearn.utils import shuffle
 
 
 # 此处数据由李宏毅老师的深度学习课程提供
